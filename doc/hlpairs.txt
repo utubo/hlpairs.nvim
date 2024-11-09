@@ -51,6 +51,7 @@ Installation
 	Example of `init.lua`
 >
 	local hlpairs = require('hlpairs')
+	hlpairs.setup()
 	# optional
 	vim.g.loaded_matchparen = 1
 	vim.g.loaded_matchit = 1
