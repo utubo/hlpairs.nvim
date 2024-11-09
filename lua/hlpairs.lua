@@ -407,26 +407,19 @@ local function textObj(a)
   setpos({ ey, ex })
 end
 
-local function textObjUserMap(key)
-  for i, v in pairs({
-    { 'o', 'a', 'true' },
-    { 'v', 'a', 'true' },
-    { 'o', 'i', 'false' },
-    { 'v', 'i', 'false' },
-  }) do
-    vim.api.nvim_set_keymap(
-      v[1],
-      v[2] .. key,
-      [[<Cmd>lua require('hlpairs').textObj(]] .. v[3] .. [[)<CR>]],
-      { noremap = true, silent = true }
-    )
-  end
+local function textObjA()
+  textObj(true)
+end
+
+local function textObjI()
+  textObj(false)
 end
 
 -- setup
 local function setup(terminal, executors)
   -- settings
   local g_hlpairs = {
+    key = '%';
     delay = 150;
     limit = 50;
     filetype = {
@@ -462,6 +455,28 @@ local function setup(terminal, executors)
       vim.b.hlpairs = nil
     end;
   })
+  -- mapping
+	vim.api.nvim_set_keymap('n', '<Plug>(hlpairs-jump)', '', { callback = jump, noremap = true })
+	vim.api.nvim_set_keymap('n', '<Plug>(hlpairs-back)', '', { callback = jumpBack, noremap = true })
+	vim.api.nvim_set_keymap('n', '<Plug>(hlpairs-forward)', '', { callback = jumpForward, noremap = true })
+	vim.api.nvim_set_keymap('n', '<Plug>(hlpairs-outer)', '', { callback = highlightOuter, noremap = true })
+	vim.api.nvim_set_keymap('n', '<Plug>(hlpairs-return)', '', { callback = returnCursor, noremap = true })
+	vim.api.nvim_set_keymap('o', '<Plug>(hlpairs-textobj-a)', '', { callback = textObjA, noremap = true })
+	vim.api.nvim_set_keymap('o', '<Plug>(hlpairs-textobj-i)', '', { callback = textObjI, noremap = true })
+	vim.api.nvim_set_keymap('v', '<Plug>(hlpairs-textobj-a)', '', { callback = textObjA, noremap = true })
+	vim.api.nvim_set_keymap('v', '<Plug>(hlpairs-textobj-i)', '', { callback = textObjI, noremap = true })
+  if is_ne(vim.g.hlpairs.key) then
+    local k = vim.g.hlpairs.key
+    vim.api.nvim_set_keymap('n', k, '<Plug>(hlpairs-jump)', {})
+    vim.api.nvim_set_keymap('n', '[' .. k, '<Plug>(hlpairs-back)', {})
+    vim.api.nvim_set_keymap('n', ']' .. k, '<Plug>(hlpairs-forward)', {})
+    vim.api.nvim_set_keymap('n', '<Leader>' .. k, '<Plug>(hlpairs-outer)', {})
+    vim.api.nvim_set_keymap('n', '<Space>'  .. k, '<Plug>(hlpairs-return)', {})
+    vim.api.nvim_set_keymap('o', 'a' .. k, '<Plug>(hlpairs-textobj-a)', {})
+    vim.api.nvim_set_keymap('o', 'i' .. k, '<Plug>(hlpairs-textobj-i)', {})
+    vim.api.nvim_set_keymap('v', 'a' .. k, '<Plug>(hlpairs-textobj-a)', {})
+    vim.api.nvim_set_keymap('v', 'i' .. k, '<Plug>(hlpairs-textobj-i)', {})
+  end
 end
 
 return {
