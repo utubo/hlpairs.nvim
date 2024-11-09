@@ -29,7 +29,7 @@ USAGE				|hlpairs-usage|
 INTERFACE			|hlpairs-interface|
   VARIABLES			  |hlpairs-variables|
   COLORS			  |hlpairs-colors|
-  MAPPINGS			  |hlpairs-functions|
+  MAPPINGS			  |hlpairs-mappings|
 
 
 ==============================================================================
@@ -64,8 +64,9 @@ VARIABLES					*hlpairs-variables*
 g:hlpairs					*g:hlpairs*
 	`g:hlpairs` is dictionaly.
 
-		`key`		Map key on `setup()`.
+		`key`		Map keys on `hlpairs.setup()`.
 				default is `%`.
+				see *hlpairs-mappings* .
 		`delay` 	The delay milliseconds to highlight.
 		`limit` 	Limit number of lines to search.
 		`skip` 		You can set a string or
@@ -121,7 +122,7 @@ vim-hlpairs uses highlight group `MatchParen`.
 
 
 ------------------------------------------------------------------------------
-MAPPINGS					*hlpairs-functions*
+MAPPINGS					*hlpairs-mappings*
 
 `<Plug>(hlpairs-jump)`		Jump to the next paren.
 				default: `%`
