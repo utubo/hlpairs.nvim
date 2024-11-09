@@ -53,7 +53,6 @@ Installation
 
 	Example of `init.lua`
 >
-	call dein#add('utubo/vim-hlpairs')
 	local hlpairs = require('hlpairs')
 	# optional
 	vim.g.loaded_matchparen = 1
