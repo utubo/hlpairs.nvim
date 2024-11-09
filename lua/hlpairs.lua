@@ -26,7 +26,7 @@ local function csv(str, dlm)
       c = s .. dlm
     else
       table.insert(a, c .. s)
-      c= ''
+      c = ''
     end
   end
   return a
@@ -136,7 +136,7 @@ local function isSkip(s)
   return result
 end
 
-local function findEnd(max_lnum, s, pair, has_skip)
+local function findEnd(buf, max_lnum, s, pair, has_skip)
   -- setup properties
   local byteidx = s.byteidx + vim.fn.len(s.text)
   local s_regex = pair.s
@@ -159,7 +159,7 @@ local function findEnd(max_lnum, s, pair, has_skip)
   local offset = s.lnum
   while offset <= max_lnum do
     local matches = vim.fn.matchbufline(
-      0,
+      buf,
       s_regex .. "\\|" .. e_regex .. (has_m and ("\\|" .. m_regex) or ""),
       offset,
       offset + SEARCH_LINE_COUNT - 1
@@ -199,6 +199,7 @@ end
 
 local function findPairs(cur)
   -- setup properties
+  local buf = vim.fn.bufnr('.')
   local b_hlpairs = vim.b.hlpairs
   local cur_lnum = cur[1]
   local cur_byteidx = cur[2] - 1
@@ -209,7 +210,7 @@ local function findPairs(cur)
   while min_lnum <= offset do
     -- find the start
     local starts = vim.fn.matchbufline(
-      0,
+      buf,
       b_hlpairs.start_regex,
       math.max(1, offset - SEARCH_LINE_COUNT + 1),
       offset,
@@ -229,7 +230,7 @@ local function findPairs(cur)
       if not(pair) then
         break
       end
-      local pos_list = findEnd(max_lnum, s, pair, has_skip)
+      local pos_list = findEnd(buf, max_lnum, s, pair, has_skip)
       if not(pos_list) then
         goto continue
       end
@@ -415,6 +416,14 @@ local function textObjI()
   textObj(false)
 end
 
+local function map(mode, prefix, name, callback)
+  local p = '<Plug>(hlpairs-' .. name .. ')'
+	vim.api.nvim_set_keymap(mode, p, '', { callback = callback, noremap = true })
+  if is_ne(vim.g.hlpairs.key) then
+    vim.api.nvim_set_keymap(mode, prefix .. vim.g.hlpairs.key, p, {})
+  end
+end
+
 -- setup
 local function setup(terminal, executors)
   -- settings
@@ -456,27 +465,15 @@ local function setup(terminal, executors)
     end;
   })
   -- mapping
-	vim.api.nvim_set_keymap('n', '<Plug>(hlpairs-jump)', '', { callback = jump, noremap = true })
-	vim.api.nvim_set_keymap('n', '<Plug>(hlpairs-back)', '', { callback = jumpBack, noremap = true })
-	vim.api.nvim_set_keymap('n', '<Plug>(hlpairs-forward)', '', { callback = jumpForward, noremap = true })
-	vim.api.nvim_set_keymap('n', '<Plug>(hlpairs-outer)', '', { callback = highlightOuter, noremap = true })
-	vim.api.nvim_set_keymap('n', '<Plug>(hlpairs-return)', '', { callback = returnCursor, noremap = true })
-	vim.api.nvim_set_keymap('o', '<Plug>(hlpairs-textobj-a)', '', { callback = textObjA, noremap = true })
-	vim.api.nvim_set_keymap('o', '<Plug>(hlpairs-textobj-i)', '', { callback = textObjI, noremap = true })
-	vim.api.nvim_set_keymap('v', '<Plug>(hlpairs-textobj-a)', '', { callback = textObjA, noremap = true })
-	vim.api.nvim_set_keymap('v', '<Plug>(hlpairs-textobj-i)', '', { callback = textObjI, noremap = true })
-  if is_ne(vim.g.hlpairs.key) then
-    local k = vim.g.hlpairs.key
-    vim.api.nvim_set_keymap('n', k, '<Plug>(hlpairs-jump)', {})
-    vim.api.nvim_set_keymap('n', '[' .. k, '<Plug>(hlpairs-back)', {})
-    vim.api.nvim_set_keymap('n', ']' .. k, '<Plug>(hlpairs-forward)', {})
-    vim.api.nvim_set_keymap('n', '<Leader>' .. k, '<Plug>(hlpairs-outer)', {})
-    vim.api.nvim_set_keymap('n', '<Space>'  .. k, '<Plug>(hlpairs-return)', {})
-    vim.api.nvim_set_keymap('o', 'a' .. k, '<Plug>(hlpairs-textobj-a)', {})
-    vim.api.nvim_set_keymap('o', 'i' .. k, '<Plug>(hlpairs-textobj-i)', {})
-    vim.api.nvim_set_keymap('v', 'a' .. k, '<Plug>(hlpairs-textobj-a)', {})
-    vim.api.nvim_set_keymap('v', 'i' .. k, '<Plug>(hlpairs-textobj-i)', {})
-  end
+  map('n', '', 'jump', jump)
+  map('n', '[', 'back' , jumpBack)
+  map('n', ']', 'forward', jumpForward)
+  map('n', '<Leader>', 'outer', highlightOuter)
+  map('n', '<Space>' , 'return', returnCursor)
+  map('o', 'a', 'textobj-a', textObjA)
+  map('o', 'i', 'textobj-i', textObjI)
+  map('v', 'a', 'textobj-a', textObjA)
+  map('v', 'i', 'textobj-i', textObjI)
 end
 
 return {
