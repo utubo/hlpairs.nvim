@@ -1,0 +1,151 @@
+*hlpairs.txt*	a summary
+
+Author  : utubo
+License : MIT license  {{{
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+}}}
+
+==============================================================================
+CONTENTS					*hlpairs-contents*
+
+INTRODUCTION			|hlpairs-introduction|
+USAGE				|hlpairs-usage|
+INTERFACE			|hlpairs-interface|
+  VARIABLES			  |hlpairs-variables|
+  COLORS			  |hlpairs-colors|
+  FUNCTIONS			  |hlpairs-functions|
+
+
+==============================================================================
+INTRODUCTION					*hlpairs-introduction*
+
+*hlpairs* is a Vim plugin highlights the parentheses around the cursor.
+
+Latest version:
+https://github.com/utubo/hlpairs.nvim
+
+This is ported from Vim9 script.
+https://github.com/utubo/vim-hlpairs.vim
+
+==============================================================================
+USAGE						*hlpairs-usage*
+
+Requirements
+	NeoVim
+
+Installation
+
+	Example of `init.lua`
+>
+	call dein#add('utubo/vim-hlpairs')
+	local hlpairs = require('hlpairs')
+	# optional
+	vim.g.loaded_matchparen = 1
+	vim.g.loaded_matchit = 1
+	vim.api.nvim_set_keymap('n', '%', { callback = hlpairs.jump, noremap = true })
+	vim.api.nvim_set_keymap('n', '[%', { callback = hlpairs.jumpBack, noremap = true })
+	vim.api.nvim_set_keymap('n', ']%', { callback = hlpairs.jumpForward, noremap = true })
+	vim.api.nvim_set_keymap('n', '<Leader>%', { callback = hlpairs.highlightOuter, noremap = true })
+	vim.api.nvim_set_keymap('n', '<Space>%', { callback = hlpairs.returnCursor, noremap = true })
+	hlpairs.textObjUserMap('%')
+
+==============================================================================
+INTERFACE					*hlpairs-interface*
+
+------------------------------------------------------------------------------
+VARIABLES					*hlpairs-variables*
+
+g:hlpairs					*g:hlpairs*
+	`g:hlpairs` is dictionaly.
+
+		`delay` 	The delay milliseconds to highlight.
+		`limit` 	Limit number of lines to search.
+		`skip` 		You can set a string or
+				a dict<filetype: expr>
+		 		See `:help searchpair()`
+		`filetype`	The parentheses for file types.
+				`*` is any filetype.
+				The value are csv-string or list or dict.
+				You can set patterns for ignore with dict.
+					`matchpairs`: match pairs.
+					`ignores`: the patterns for ignore
+				You can use `\1` in the end or pair,
+				but it won't work perfectly, so use `\V`.
+				See `:help mps`, `:help \\V`
+
+	The default is
+>
+	let g:hlpairs = {
+	  'delay': 150,
+	  'limit': 50,
+	  'filetype': {
+	    'vim':  '\<if\>:else:endif,for:endfor,while:endwhile,'
+	        ..  'function:endfunction,\<def\>:enddef,'
+	        ..  '\<try\>:\<\(catch\|finally\)\>:\<endtry\>,',
+	        ..  'augroup .*:augroup END'
+	    'ruby': '\<if\>:\(else\|elsif\):\<end\>,'
+	         .. '\<\(def\|do\|class\|if\)\>:\<end\>',
+	    'lua':  '\<if\>:\(else\|elseif\):\<end\>,'
+	        ..  '\<\(function\|do\|if\)\>:\<end\>,'
+	        ..  '\[\[:\]\]',
+	    'html,xml': {
+	      matchpairs: [
+	        '\<[a-zA-Z0-9_\:-]\+=":"',
+	        '<\([a-zA-Z0-9_\:]\+\)>\?:</\1>',
+	        '<!--:-->'
+	      ],
+	      'ignores': '<:>'
+	    },
+	    '*': '\w\@<!\w*(:)',
+	  },
+	  'skip': {
+	    'ruby': 'getline(".") =~ "\\S\\s*if\\s"',
+	  }
+	}
+>
+
+------------------------------------------------------------------------------
+COLORS						*hlpairs-colors*
+
+vim-hlpairs uses highlight group `MatchParen`.
+
+
+------------------------------------------------------------------------------
+FUNCTIONS					*hlpairs-functions*
+
+`hlpairs#jump([{flags}])`	Jump to the next paren.
+				{flags} is a String.
+				'f'	Jump to the next paren. (no loop)
+				'b'	Jump to the previous paren. (no loop)
+				'e'	Jump to the end of the match
+
+`hlpairs#jumpBack()`		Jump to the previous paren.
+
+`hlpairs#jumpForward()`		Jump to the next paren.
+
+`hlpairs#higlihtOuter()`	Highlight the pair outside of the current pair.
+
+`hlpairs#returnCursor()`	Return the cursor before `hlpairs#Jump()`.
+
+`hlpairs#textObjUserMap({key})`	Call `textobj#user#map()` to mapping to
+				$'a{key}' and $'i{key}'.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:
+
