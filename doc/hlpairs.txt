@@ -35,7 +35,7 @@ INTERFACE			|hlpairs-interface|
 ==============================================================================
 INTRODUCTION					*hlpairs-introduction*
 
-*hlpairs* is a Vim plugin highlights the parentheses around the cursor.
+*hlpairs.nvim* is a NeoVim plugin highlights the parentheses around the cursor.
 
 Latest version:
 https://github.com/utubo/hlpairs.nvim
@@ -45,9 +45,6 @@ https://github.com/utubo/vim-hlpairs.vim
 
 ==============================================================================
 USAGE						*hlpairs-usage*
-
-Requirements
-	NeoVim
 
 Installation
 
