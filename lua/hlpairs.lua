@@ -128,6 +128,13 @@ local function toPosItem(s)
   return { s.lnum, s.byteidx + 1, vim.fn.len(s.text) }
 end
 
+local function replaceMatchGroup(s, g)
+  return string.gsub(s, "\\[1-9]", function (m)
+    local i = tonumber(string.sub(m, 2))
+    return string.gsub(g[i], [[\]], [[\\]])
+  end)
+end
+
 local function isSkip(s)
   local cur = curpos()
   setpos({ s.lnum, s.byteidx })
