@@ -449,8 +449,8 @@ local function setup(terminal, executors)
   }
   g_hlpairs.filetype['html,xml'] = {
     matchpairs = {
-      [[\<[a-zA-Z0-9_\ =-]\+=":"]],
-      [[<\([a-zA-Z0-9_\ =]\+\)>\?:</\1>]],
+      [[\<[a-zA-Z0-9_\:-]\+=":"]],
+      [[<\([a-zA-Z0-9\:]\+\)>\?:</\1>]],
       [[<!-- =-->]]
     };
     ignores = '<:>';
