@@ -199,7 +199,7 @@ end
 
 local function findPairs(cur)
   -- setup properties
-  local buf = vim.fn.bufnr('.')
+  local buf = vim.fn.bufnr()
   local b_hlpairs = vim.b.hlpairs
   local cur_lnum = cur[1]
   local cur_byteidx = cur[2] - 1
