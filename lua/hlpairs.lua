@@ -41,6 +41,10 @@ local function setpos(cur)
   vim.api.nvim_win_set_cursor(0, { cur[1], cur[2] - 1 })
 end
 
+local function getline(buf, lnum)
+  return vim.api.nvim_buf_get_lines(buf, lnum - 1, lnum, false)[1]
+end
+
 local function getPairParams(text)
   local b_hlpairs = vim.b.hlpairs
   local pair = b_hlpairs.pairs_cache[text]
@@ -92,15 +96,18 @@ local function onOptionSet()
       goto continue
     end
     local ary = csv(sme, ':')
-    local start = ary[1]
-    local middle = #ary == 3 and ary[2] or ""
-    local end_ = ary[#ary]
+    local s_full = ary[1]
+    local i = string.find(s_full, [[\%%%(]])
+    local s = i and string.sub(s_full, 1, i - 1) or s_full
+    local m = #ary == 3 and ary[2] or ""
+    local e = ary[#ary]
     table.insert(pairs_, {
-      s = start == '[' and "\\[" or start;
-      m = middle;
-      e = end_;
-      has_matchstr = string.find(end_, "\\[1-9]") or string.find(middle, "\\[1-9]");
-      has_m =  middle ~= "";
+      s_full = s_full;
+      s = s == '[' and "\\[" or s;
+      m = m;
+      e = e;
+      has_matchstr = string.find(e, "\\[1-9]") or string.find(m, "\\[1-9]");
+      has_m =  m ~= "";
     })
     ::continue::
   end
@@ -243,6 +250,14 @@ local function findPairs(cur)
       end
       local e = pos_list[#pos_list]
       if cur[1] < e[1] or cur[1] == e[1] and cur[2] < e[2] + e[3] then
+        if pair.s_full ~= pair.s then
+          local p = pos_list[1]
+          local t = string.sub(getline(buf, p[1]), p[2] - 1)
+          local m = vim.fn.matchstr(t, pair.s_full)
+          if m then
+            pos_list[1][3] = #m
+          end
+        end
         return pos_list
       end
       ::continue::
@@ -401,7 +416,7 @@ local function textObj(a)
     ex = ex - 1
     if ex == 0 then
       ey = ey - 1
-      ex = len(vim.api.nvim_buf_get_lines(0, ey, ey, false))
+      ex = len(getline(0, ey))
     end
   end
   local m = vim.api.nvim_get_mode().mode
@@ -450,7 +465,7 @@ local function setup(terminal, executors)
   g_hlpairs.filetype['html,xml'] = {
     matchpairs = {
       [[\<[a-zA-Z0-9_\:-]\+=":"]],
-      [[<\([a-zA-Z0-9\:]\+\)>\?:</\1>]],
+      [[<\([a-zA-Z0-9\:]\+\)\%([^>]*\)>:</\1>]],
       [[<!-- =-->]]
     };
     ignores = '<:>';

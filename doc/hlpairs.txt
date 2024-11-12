@@ -67,11 +67,11 @@ g:hlpairs					*g:hlpairs*
 		`key`		Map keys on `hlpairs.setup()`.
 				default is `%`.
 				see *hlpairs-mappings* .
-		`delay` 	The delay milliseconds to highlight.
-		`limit` 	Limit number of lines to search.
-		`skip` 		You can set a string or
+		`delay		The delay milliseconds to highlight.
+		`limit		Limit number of lines to search.
+		`skip`		You can set a string or
 				a dict<filetype: expr>
-		 		See `:help searchpair()`
+					See `:help searchpair()`
 		`filetype`	The parentheses for file types.
 				`*` is any filetype.
 				The value are csv-string or list or dict.
@@ -81,6 +81,8 @@ g:hlpairs					*g:hlpairs*
 				You can use `\1` in the end or pair,
 				but it won't work perfectly, so use `\V`.
 				See `:help mps`, `:help \\V`
+				For html, hlpairs searchs the left with
+				before `\%(`.
 
 
 	The default is
