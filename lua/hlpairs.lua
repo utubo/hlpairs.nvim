@@ -253,10 +253,12 @@ local function findPairs(cur)
         if pair.s_full ~= pair.s then
           local p = pos_list[1]
           local t = string.sub(getline(buf, p[1]), p[2] - 1)
-          local m = vim.fn.matchstr(t, pair.s_full)
-          if m then
-            pos_list[1][3] = #m
+          local l = #vim.fn.matchstr(t, pair.s_full)
+          if l == 0 then
+            pos_list = {}
+            goto continue
           end
+          pos_list[1][3] = l
         end
         return pos_list
       end
