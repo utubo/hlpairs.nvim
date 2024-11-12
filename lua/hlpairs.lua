@@ -409,25 +409,35 @@ local function textObj(a)
   end
   local sy, sx, sl = unpack(p[1])
   local ey, ex, el = unpack(p[#p])
-  if a then
-    ex = ex + el - 1
-  else
-    sx = sx + sl
-    ex = ex - 1
-    if ex == 0 then
-      ey = ey - 1
-      ex = len(getline(0, ey))
-    end
-  end
   local m = vim.api.nvim_get_mode().mode
   if string.match(m, '^[vV]$') then
     vim.cmd('normal! ' .. m)
   else
     m = 'v'
   end
-  setpos({ sy, sx })
-  vim.cmd('normal! ' .. m)
   setpos({ ey, ex })
+  vim.cmd('normal! ' .. m)
+  setpos({ sy, sx })
+  if a then
+    if 1 < el then
+      vim.cmd('normal! o' .. tostring(el - 1) .. 'l')
+    end
+  else
+    -- start
+    vim.cmd('normal! ' .. tostring(sl) .. 'l')
+    local indent = ''
+    if sy + 1 < ey then
+      -- keep linebreak
+      vim.cmd('normal! j0')
+      indent = vim.fn.matchstr(getline(0, sy), [[^\s\+]])
+    end
+    -- end
+    if ex < 2 or string.sub(getline(0, ey), 1, ex - 1) == indent then
+      vim.cmd('normal! ok$')
+    else
+      vim.cmd('normal! oh')
+    end
+  end
 end
 
 local function textObjA()
