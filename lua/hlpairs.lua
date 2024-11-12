@@ -461,7 +461,7 @@ local function setup(terminal, executors)
   -- settings
   local g_hlpairs = {
     key = '%';
-    delay = 150;
+    delay = 50;
     limit = 50;
     filetype = {
       vim = [[\<if\>:else\(if\)\?:end,\<for\>:\<endfor\>,while:endwhile,function:endfunction,\<function\>:end,\<try\>:\<\(catch\|finally\)\>:\<endtry\>,augroup .*:augroup END]];

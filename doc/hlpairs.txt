@@ -1,4 +1,4 @@
-*hlpairs.txt*	a summary
+*hlpairs.txt*	Highlights the parentheses around the cursor.
 
 Author  : utubo
 License : MIT license  {{{
@@ -89,7 +89,7 @@ g:hlpairs					*g:hlpairs*
 >
 	let g:hlpairs = {
 	  'key': '%',
-	  'delay': 150,
+	  'delay': 50,
 	  'limit': 50,
 	  'filetype': {
 	    'vim':  '\<if\>:else:endif,for:endfor,while:endwhile,'
@@ -120,7 +120,7 @@ g:hlpairs					*g:hlpairs*
 ------------------------------------------------------------------------------
 COLORS						*hlpairs-colors*
 
-vim-hlpairs uses highlight group `MatchParen`.
+hlpairs.nvim uses highlight group `MatchParen`.
 
 
 ------------------------------------------------------------------------------
