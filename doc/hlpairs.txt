@@ -53,7 +53,7 @@ Installation
 	require('hlpairs').setup()
 	vim.g.loaded_matchparen = 1
 	vim.g.loaded_matchit = 1
-
+<
 
 ==============================================================================
 INTERFACE					*hlpairs-interface*
@@ -67,8 +67,8 @@ g:hlpairs					*g:hlpairs*
 		`key`		Map keys on `hlpairs.setup()`.
 				default is `%`.
 				see *hlpairs-mappings* .
-		`delay		The delay milliseconds to highlight.
-		`limit		Limit number of lines to search.
+		`delay`		The delay milliseconds to highlight.
+		`limit`		Limit number of lines to search.
 		`skip`		You can set a string or
 				a dict<filetype: expr>
 					See `:help searchpair()`
@@ -115,7 +115,7 @@ g:hlpairs					*g:hlpairs*
 	    'ruby': 'getline(".") =~ "\\S\\s*if\\s"',
 	  }
 	}
->
+<
 
 ------------------------------------------------------------------------------
 COLORS						*hlpairs-colors*
