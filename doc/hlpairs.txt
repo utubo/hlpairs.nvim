@@ -68,7 +68,11 @@ g:hlpairs					*g:hlpairs*
 				default is `%`.
 				see *hlpairs-mappings* .
 		`delay`		The delay milliseconds to highlight.
+		`timeout`	The search stops when more than this many
+				millisecond shave passed.
+				if less than `1` then it does not timeout.
 		`limit`		Limit number of lines to search.
+				if less than `1` then it searches all lines.
 		`skip`		You can set a string or
 				a dict<filetype: expr>
 					See `:help searchpair()`
@@ -90,7 +94,8 @@ g:hlpairs					*g:hlpairs*
 	let g:hlpairs = {
 	  'key': '%',
 	  'delay': 50,
-	  'limit': 50,
+	  'timeout': 50,
+	  'limit': 0,
 	  'filetype': {
 	    'vim':  '\<if\>:else:endif,for:endfor,while:endwhile,'
 	        ..  'function:endfunction,\<def\>:enddef,'

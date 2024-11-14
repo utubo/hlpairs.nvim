@@ -217,8 +217,9 @@ local function findPairs(cur)
   local b_hlpairs = vim.b.hlpairs
   local cur_lnum = cur[1]
   local cur_byteidx = cur[2] - 1
-  local min_lnum = math.max(1, cur_lnum - vim.g.hlpairs.limit)
-  local max_lnum = cur_lnum + vim.g.hlpairs.limit
+  local limit = vim.g.hlpairs.limit <= 0 and vim.api.nvim_buf_line_count(buf) or vim.g.hlpairs.limit
+  local min_lnum = math.max(1, cur_lnum - limit)
+  local max_lnum = cur_lnum + limit
   local has_skip = b_hlpairs.skip and b_hlpairs.skip ~= ''
   local offset = cur_lnum
   while min_lnum <= offset do
@@ -268,7 +269,7 @@ local function findPairs(cur)
   return {}
 end
 
-local function highlightPair()
+local function highlightPairImpl()
   timer = nil
   if not(vim.b.hlpairs) then
     onOptionSet()
@@ -305,6 +306,14 @@ local function highlightPair()
     w_hlpairs.matchid = vim.fn.matchaddpos('MatchParen', new_pos)
   end
   vim.w.hlpairs = w_hlpairs
+end
+
+local function highlightPair()
+  if vim.g.hlpairs.timeout <= 0 then
+    highlightPairImpl()
+  else
+    vim.wait(vim.g.hlpairs.timeout, highlightPairImpl, 10)
+  end
 end
 
 local timer = nil
@@ -464,7 +473,8 @@ local function setup(terminal, executors)
   local g_hlpairs = {
     key = '%';
     delay = 50;
-    limit = 50;
+    timeout = 50;
+    limit = 0;
     filetype = {
       vim = [[\<if\>:else\(if\)\?:end,\<for\>:\<endfor\>,while:endwhile,function:endfunction,\<function\>:end,\<try\>:\<\(catch\|finally\)\>:\<endtry\>,augroup .*:augroup END]];
       ruby = [[\<if\>:else\(if\)\?:\<end\>,\<\(function\|do\|class\|if\)\>:\<end\>]];
