@@ -87,6 +87,7 @@ g:hlpairs					*g:hlpairs*
 				See `:help mps`, `:help \\V`
 				For html, hlpairs searchs the left with
 				before `\%(`.
+				The whitespaces will be trimmed.
 
 
 	The default is
@@ -113,6 +114,13 @@ g:hlpairs					*g:hlpairs*
 	        '<!--:-->'
 	      ],
 	      'ignores': '<:>'
+	    },
+	    'sh,bash,zsh': {
+	      matchpairs: [
+	        '\<if\>:\<\(then\|elif\|else\)\>:\<fi\>',
+	        '\<case\>:\<\in\>\|^\s*[^)]\+):\<esac\>',
+	        '\<do\>:\<done\>',
+	      ],
 	    },
 	    '*': '\w\@<!\w*(:)',
 	  },

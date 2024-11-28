@@ -132,7 +132,7 @@ local function onOptionSet()
 end
 
 local function toPosItem(s)
-  return { s.lnum, s.byteidx + 1, vim.fn.len(s.text) }
+  return { s.lnum, s.byteidx + 1, vim.fn.len(s.text), s.text }
 end
 
 local function replaceMatchGroup(s, g)
@@ -211,6 +211,30 @@ local function findEnd(buf, max_lnum, s, pair, has_skip)
   return nil
 end
 
+local function fixPosList(buf, pos_list, pair)
+  -- for HTML tag
+  if pair.s_full ~= pair.s then
+    local p = pos_list[1]
+    local t = string.sub(getline(buf, p[1]), p[2] - 1)
+    local l = #vim.fn.matchstr(t, pair.s_full) -- len with byte of vim
+    if l == 0 then
+      return false
+    end
+    pos_list[1][3] = l
+  end
+
+  -- trim
+  for _, p in pairs(pos_list) do
+    local t = p[4]:match'^%s*(.*%S)' or ''
+    if t ~= p[4] then
+      local s = vim.fn.match(p[4], [[\S]]) -- position with byte of vim
+      p[2] = p[2] + s
+      p[3] = vim.fn.len(t)
+    end
+  end
+  return true
+end
+
 local function findPairs(cur)
   -- setup properties
   local buf = vim.fn.bufnr()
@@ -251,17 +275,12 @@ local function findPairs(cur)
       end
       local e = pos_list[#pos_list]
       if cur[1] < e[1] or cur[1] == e[1] and cur[2] < e[2] + e[3] then
-        if pair.s_full ~= pair.s then
-          local p = pos_list[1]
-          local t = string.sub(getline(buf, p[1]), p[2] - 1)
-          local l = #vim.fn.matchstr(t, pair.s_full)
-          if l == 0 then
-            pos_list = {}
-            goto continue
-          end
-          pos_list[1][3] = l
+        if fixPosList(buf, pos_list, pair) then
+          return pos_list
+        else
+          pos_list = {}
+          goto continue
         end
-        return pos_list
       end
       ::continue::
     end
@@ -418,8 +437,8 @@ local function textObj(a)
   if is_empty(p) then
     return
   end
-  local sy, sx, sl = unpack(p[1])
-  local ey, ex, el = unpack(p[#p])
+  local sy, sx, sl, st = unpack(p[1])
+  local ey, ex, el, et = unpack(p[#p])
   local m = vim.api.nvim_get_mode().mode
   if string.match(m, '^[vV]$') then
     vim.cmd('normal! ' .. m)
@@ -461,7 +480,7 @@ end
 
 local function map(mode, prefix, name, callback)
   local p = '<Plug>(hlpairs-' .. name .. ')'
-	vim.api.nvim_set_keymap(mode, p, '', { callback = callback, noremap = true })
+  vim.api.nvim_set_keymap(mode, p, '', { callback = callback, noremap = true })
   if is_ne(vim.g.hlpairs.key) then
     vim.api.nvim_set_keymap(mode, prefix .. vim.g.hlpairs.key, p, {})
   end
@@ -492,6 +511,13 @@ local function setup(terminal, executors)
     };
     ignores = '<:>';
   }
+  g_hlpairs.filetype['sh,bash,zsh'] = {
+    matchpairs = {
+      [[\<if\>:\<\(then\|elif\|else\)\>:\<fi\>]],
+      [[\<case\>:\<\in\>\|^\s*[^)]\+):\<esac\>]],
+      [[\<do\>:\<done\>]],
+    },
+  }
   g_hlpairs.filetype['*'] = [[\w\@<!\w*(:)]]
   g_hlpairs = merge(g_hlpairs, vim.g.hlpairs)
   vim.g.hlpairs = g_hlpairs
@@ -521,7 +547,7 @@ local function setup(terminal, executors)
 end
 
 return {
-	setup = setup;
+  setup = setup;
   jump = jump;
   jumpBack = jumpBack;
   jumpForward = jumpForward;
