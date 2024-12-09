@@ -78,7 +78,7 @@ local function onOptionSet()
   if ft then
     for k, v in pairs(vim.g.hlpairs.filetype) do
       if string.find(',' .. k .. ',', ',' .. ft .. ',') then
-        if type(v) == 'table' then
+        if type(v) == 'table' and v.matchpairs then
           ftpairs = concat(ftpairs, toList(v.matchpairs))
           ignores = concat(ignores, toList(v.ignores or  ""))
         else
@@ -495,7 +495,15 @@ local function setup(terminal, executors)
     timeout = 50;
     limit = 0;
     filetype = {
-      vim = [[\<if\>:else\(if\)\?:end,\<for\>:\<endfor\>,while:endwhile,function:endfunction,\<function\>:end,\<try\>:\<\(catch\|finally\)\>:\<endtry\>,augroup .*:augroup END]];
+      vim = {
+        [[\<if\>:\<else\(if\)\?\>:\<endif\>]],
+        [[\<for\>:\<endfor\>]],
+        [[\<while\>:\<endwhile\>]],
+        [[\<function\>:\<endfunction\>]],
+        [[\<\(export\s\+\)\?def\>:\<enddef\>]],
+        [[\<try\>:\<\(catch\|finally\)\>:\<endtry\>]],
+        [[\<augroup\s\+\S*\>:\<augroup END\>]]
+      };
       ruby = [[\<if\>:else\(if\)\?:\<end\>,\<\(function\|do\|class\|if\)\>:\<end\>]];
       lua = [[\<if\>:else\(if\)\?:\<end\>,\<\(function\|do\|if\)\>:\<end\>,\[\[:\]\]] .. ']';
     };
