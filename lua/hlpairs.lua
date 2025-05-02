@@ -420,25 +420,80 @@ local function returnCursor()
   end
 end
 
-local function highlightOuter()
+local function highlightOuter(vcount)
   local p = getPosList()
   if is_empty(p) then
     return
   end
+  if vcount and 1 < vcount then
+    for i = 1, vcount, 1 do
+      hilightOuter()
+    end
+    return
+  end
   local cur = curpos()
   prevent_remark = 1
+  local y, x, l, t = p[1]
+  x = x - 1
+  if x <= 1 and 1 < y then
+    y = y - 1
+    x = len(getline(0, y))
+  end
   setpos({ p[1][1], p[1][2] - 1 })
   highlightPair()
   setpos(cur)
 end
 
-local function textObj(a)
+local function textObj(around, vcount)
   local p = getPosList()
-  if is_empty(p) then
+  if #p < 0 then
     return
+  end
+  local a = around
+  local count = vcount and 0 < vcount and vcount or 1
+  local cur = curpos()
+  local cy, cx = cur[1], cur[2]
+  -- support v:count
+  if (a == 'A' or a == 'I') and 1 < count then
+    -- ignore sub blocks
+    for i = 2, count do
+      hilightOuter()
+    end
+    TextObj(a, 1)
+    return
+  end
+  if #p <= count then
+    hilightOuter()
+    TextObj(around, count - #p + 1)
+    return
+  end
+  -- default selection
+  if #p == count + 1 then
+    a = a:upper()
   end
   local sy, sx, sl, st = unpack(p[1])
   local ey, ex, el, et = unpack(p[#p])
+  -- find block
+  local index = 0
+  if 2 < #p and (a == 'i' or a == 'a' or a == '') then
+    for i = 1, #p, 1 do
+      local y, x, l, t = p[i]
+      if cy < y or cy == y and cx <= x then
+        index = i - 1
+        break
+      end
+    end
+    if index < 1 then
+      return
+    end
+    sy, sx, sl, st = p[index]
+    ey, ex, el, et = p[min(index + count, #p)]
+  end
+  if a == '' then
+    sy = cy
+    sx = cx
+  end
+  -- ready
   local m = vim.api.nvim_get_mode().mode
   if string.match(m, '^[vV]$') then
     vim.cmd('normal! ' .. m)
@@ -448,34 +503,50 @@ local function textObj(a)
   setpos({ ey, ex })
   vim.cmd('normal! ' .. m)
   setpos({ sy, sx })
-  if a then
-    if 1 < el then
-      vim.cmd('normal! o' .. tostring(el - 1) .. 'l')
-    end
+  -- start
+  local indent = ''
+  if a == 'A' or a == 'a' and 1 < index then
+    -- nop
   else
-    -- start
-    vim.cmd('normal! ' .. tostring(sl) .. 'l')
-    local indent = ''
+    if sl then
+      vim.cmd('normal! ' .. tostring(sl) .. 'l')
+    end
     if sy + 1 < ey then
       -- keep linebreak
       vim.cmd('normal! j0')
       indent = vim.fn.matchstr(getline(0, sy), [[^\s\+]])
     end
-    -- end
-    if ex < 2 or string.sub(getline(0, ey), 1, ex - 1) == indent then
-      vim.cmd('normal! ok$')
-    else
-      vim.cmd('normal! oh')
+  end
+  -- end_
+  if a == 'A' or a == 'a' and index <= 1 then
+    if 1 < el then
+      vim.cmd('normal! o' .. tostring(el - 1) .. 'l')
     end
+  elseif ex < 2 or string.sub(getline(0, ey), 1, ex - 1) == indent then
+    vim.cmd('normal! ok$')
+  else
+    vim.cmd('normal! oh')
   end
 end
 
 local function textObjA()
-  textObj(true)
+  textObj('a', vim.v.count)
 end
 
 local function textObjI()
-  textObj(false)
+  textObj('i', vim.v.count)
+end
+
+local function textObjAUpper()
+  textObj('A', vim.v.count)
+end
+
+local function textObjIUpper()
+  textObj('I', vim.v.count)
+end
+
+local function textObjPercent()
+  textObj('', vim.v.count)
 end
 
 local function map(mode, prefix, name, callback)
@@ -504,8 +575,8 @@ local function setup(terminal, executors)
         [[\<try\>:\<\(catch\|finally\)\>:\<endtry\>]],
         [[\<augroup\s\+\S*\>:\<augroup END\>]]
       };
-      ruby = [[\<if\>:else\(if\)\?:\<end\>,\<\(function\|do\|class\|if\)\>:\<end\>]];
-      lua = [[\<if\>:else\(if\)\?:\<end\>,\<\(function\|do\|if\)\>:\<end\>,\[\[:\]\]] .. ']';
+      lua = [[\<\(function\|do\|if\)\>:\<else\(if\)\?\>:\<end\>,\[\[:\]\]] .. ']';
+      ruby = [[\<\(def\|do\|class\|if\)\>:\<\(else\|elsif\)\>:\<end\>]];
     };
     skip = {
       ruby = [[getline(".") =~ "\\S\\s*if\\s"]];
@@ -548,10 +619,13 @@ local function setup(terminal, executors)
   map('n', ']', 'forward', jumpForward)
   map('n', '<Leader>', 'outer', highlightOuter)
   map('n', '<Space>' , 'return', returnCursor)
-  map('o', 'a', 'textobj-a', textObjA)
-  map('o', 'i', 'textobj-i', textObjI)
-  map('v', 'a', 'textobj-a', textObjA)
-  map('v', 'i', 'textobj-i', textObjI)
+  for k, m in pairs({'o', 'v'}) do
+    map(m, 'a', 'textobj-a', textObjA)
+    map(m, 'i', 'textobj-i', textObjI)
+    map(m, 'A', 'textobj-A', textObjAUpper)
+    map(m, 'I', 'textobj-I', textObjIUpper)
+    map(m, '',  'textobj-%', textObjPercent)
+  end
 end
 
 return {
