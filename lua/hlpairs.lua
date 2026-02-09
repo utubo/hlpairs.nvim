@@ -17,7 +17,7 @@ local function concat(a, b)
   return a
 end
 
-local function csv(str, dlm)
+local function split(str, dlm)
   local a = {}
   local c = ''
   local d = dlm or ','
@@ -67,8 +67,8 @@ local function getPairParams(text)
   return nil
 end
 
-local function toList(v)
-  return type(v) == 'string' and csv(v) or v or {}
+local function csv(v)
+  return type(v) == 'string' and split(v) or v or {}
 end
 
 local function onOptionSet()
@@ -79,23 +79,23 @@ local function onOptionSet()
     for k, v in pairs(vim.g.hlpairs.filetype) do
       if string.find(',' .. k .. ',', ',' .. ft .. ',') then
         if type(v) == 'table' and v.matchpairs then
-          ftpairs = concat(ftpairs, toList(v.matchpairs))
-          ignores = concat(ignores, toList(v.ignores or  ""))
+          ftpairs = concat(ftpairs, csv(v.matchpairs))
+          ignores = concat(ignores, csv(v.ignores or  ""))
         else
-          ftpairs = concat(ftpairs, toList(v))
+          ftpairs = concat(ftpairs, csv(v))
         end
       end
     end
   end
-  ftpairs = concat(ftpairs, toList(vim.g.hlpairs.filetype['*']))
-  ftpairs = concat(ftpairs, csv(vim.o.matchpairs))
+  ftpairs = concat(ftpairs, csv(vim.g.hlpairs.filetype['*']))
+  ftpairs = concat(ftpairs, split(vim.o.matchpairs))
   local ignores = ',' .. table.concat(ignores, ',') .. ','
   local pairs_ = {}
   for k, sme in pairs(ftpairs) do
     if string.find(ignores, ',' .. sme .. ',') then
       goto continue
     end
-    local ary = csv(sme, ':')
+    local ary = split(sme, ':')
     local s_full = ary[1]
     local i = string.find(s_full, [[\%%%(]])
     local s = i and string.sub(s_full, 1, i - 1) or s_full
