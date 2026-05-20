@@ -102,7 +102,9 @@ g:hlpairs					*g:hlpairs*
 	\   'vim':  '\<if\>:else:endif,for:endfor,while:endwhile,'
 	\       ..  'function:endfunction,\<def\>:enddef,'
 	\       ..  '\<try\>:\<\(catch\|finally\)\>:\<endtry\>,',
-	\       ..  'augroup .*:augroup END'
+	\       ..  'augroup .*:augroup END',
+	\       ..  '\c<\(Script\)\?Cmd>:\c<CR>',
+	\       ..  '[a-zA-Z_#]*(:)'
 	\   'lua': '\<\(function\|do\|if\)\>:\<else\(if\)\?\>:\<end\>,\[\[:\]\]',
 	\   'ruby': '\<\(def\|do\|class\|if\)\>:\<\(else\|elsif\)\>:\<end\>',
 	\   'html,xml': {
@@ -120,7 +122,7 @@ g:hlpairs					*g:hlpairs*
 	\       '\<do\>:\<done\>',
 	\     ],
 	\   },
-	\   '*': '\w\@<!\w*(:)',
+	\   '*': '\([a-zA-Z_]\w*\)\?(:)',
 	\ },
 	\ 'skip': {
 	\   'ruby': 'getline(".") =~ "\\S\\s*if\\s"',

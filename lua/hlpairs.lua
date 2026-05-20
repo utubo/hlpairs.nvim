@@ -573,7 +573,9 @@ local function setup(terminal, executors)
         [[\<function\>:\<endfunction\>]],
         [[\<\(export\s\+\)\?def\>:\<enddef\>]],
         [[\<try\>:\<\(catch\|finally\)\>:\<endtry\>]],
-        [[\<augroup\s\+\S*\>:\<augroup END\>]]
+        [[\<augroup\s\+\S*\>:\<augroup END\>]],
+        [[\c<\(Script\)\?Cmd>:\c<CR>]]
+        [[[a-zA-Z_#]*(:)]]
       };
       lua = [[\<\(function\|do\|if\)\>:\<else\(if\)\?\>:\<end\>,\[\[:\]\]] .. ']';
       ruby = [[\<\(def\|do\|class\|if\)\>:\<\(else\|elsif\)\>:\<end\>]];
@@ -597,7 +599,7 @@ local function setup(terminal, executors)
       [[\<do\>:\<done\>]],
     },
   }
-  g_hlpairs.filetype['*'] = [[\w\@<!\w*(:)]]
+  g_hlpairs.filetype['*'] = [[\([a-zA-Z_]\w*\)\?(:)]]
   g_hlpairs = merge(g_hlpairs, vim.g.hlpairs)
   vim.g.hlpairs = g_hlpairs
   -- autocmd
